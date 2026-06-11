@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+metadata.json
+deploy-*.py
+deploy-*.sh
