@@ -615,7 +615,7 @@ export default function App() {
             {/* Clickable Infogito logo to Infogito.com */}
             <div className="flex items-center gap-3 md:self-end md:mb-1.5">
               <a
-                href="https://infogito.com"
+                href="https://www.infogito.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 opacity-75 hover:opacity-100 transition-all duration-300 hover:scale-[1.01] translate-y-0.5"
