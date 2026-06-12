@@ -89,7 +89,7 @@ export default function App() {
     <div
       className={`relative min-h-screen h-auto overflow-x-hidden overflow-y-visible md:h-auto md:min-h-screen md:overflow-visible w-full transition-colors duration-700 font-sans ${isDarkMode ? "bg-[#0a0f1c] text-slate-100" : "bg-white text-[#0f172a]"}`}
     >
-      <ShaderBackground isDarkMode={isDarkMode} toggles={shaderToggles} />
+      {/* Shader background disabled */}
 
       {/* Debug Toggles (Bottom Left) - Only shown on /debug page */}
       {isDebug && (
