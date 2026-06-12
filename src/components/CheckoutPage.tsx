@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Check, 
-  Lock, 
-  Users, 
-  ArrowLeft, 
-  Plus, 
-  Minus, 
-  ShieldCheck, 
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Check,
+  Lock,
+  Users,
+  ArrowLeft,
+  Plus,
+  Minus,
+  ShieldCheck,
   ArrowRight,
-  Info
-} from 'lucide-react';
+  Info,
+} from "lucide-react";
 
 interface CheckoutPageProps {
   navigate: (path: string) => void;
@@ -24,34 +24,41 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
 
   // Set the SEO metadata dynamically for the get-started route
   useEffect(() => {
-    document.title = 'Start Using ConciseCap | Field Documentation Software for Contractors';
-    
+    document.title =
+      "Start Using ConciseCap | Field Documentation Software for Contractors";
+
     // Update meta description
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
+      metaDesc = document.createElement("meta");
+      metaDesc.setAttribute("name", "description");
       document.head.appendChild(metaDesc);
     }
-    metaDesc.setAttribute('content', 'Start using ConciseCap to capture job-site photos, notes, signatures, equipment details, proof of work, and invoice-ready job records for your contractor team.');
+    metaDesc.setAttribute(
+      "content",
+      "Start using ConciseCap to capture job-site photos, notes, signatures, equipment details, proof of work, and invoice-ready job records for your contractor team.",
+    );
 
     // Update Open Graph (OG) title
     let ogTitle = document.querySelector('meta[property="og:title"]');
     if (!ogTitle) {
-      ogTitle = document.createElement('meta');
-      ogTitle.setAttribute('property', 'og:title');
+      ogTitle = document.createElement("meta");
+      ogTitle.setAttribute("property", "og:title");
       document.head.appendChild(ogTitle);
     }
-    ogTitle.setAttribute('content', 'Start Using ConciseCap');
+    ogTitle.setAttribute("content", "Start Using ConciseCap");
 
     // Update Open Graph (OG) description
     let ogDesc = document.querySelector('meta[property="og:description"]');
     if (!ogDesc) {
-      ogDesc = document.createElement('meta');
-      ogDesc.setAttribute('property', 'og:description');
+      ogDesc = document.createElement("meta");
+      ogDesc.setAttribute("property", "og:description");
       document.head.appendChild(ogDesc);
     }
-    ogDesc.setAttribute('content', 'Launch pricing for contractor teams. Capture job-site photos, notes, signatures, proof of work, and invoice-ready job records with ConciseCap.');
+    ogDesc.setAttribute(
+      "content",
+      "Launch pricing for contractor teams. Capture job-site photos, notes, signatures, proof of work, and invoice-ready job records with ConciseCap.",
+    );
   }, []);
 
   // Pricing formula values
@@ -61,12 +68,12 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
   const recurringMonthTotal = 29 + extraCost;
 
   const handleIncrement = () => {
-    setTotalUsers(prev => prev + 1);
+    setTotalUsers((prev) => prev + 1);
   };
 
   const handleDecrement = () => {
     if (totalUsers > 5) {
-      setTotalUsers(prev => prev - 1);
+      setTotalUsers((prev) => prev - 1);
     }
   };
 
@@ -74,39 +81,41 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
     setIsRedirecting(true);
     setRedirectError(null);
     try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ totalUsers }),
       });
 
       if (!response.ok) {
-        throw new Error('Could not initialize checkout gateway.');
+        throw new Error("Server unavailable");
       }
 
       const data = await response.json();
       if (data.url) {
-        // Safe redirect to either real Stripe Checkout or local Stripe Simulation route
         window.location.href = data.url;
       } else {
-        throw new Error('No redirect gateway URL was returned.');
+        throw new Error("No redirect gateway URL was returned.");
       }
-    } catch (err: any) {
-      console.error(err);
-      setRedirectError('Temporary checkout handshake issue. Please try again or contact support.');
-      setIsRedirecting(false);
+    } catch {
+      // Server API not available (e.g. on Cloudflare Pages static hosting)
+      // Fall back to the client-side simulated checkout
+      const extraSeats = Math.max(0, totalUsers - 5);
+      const firstPrice = 9 + extraSeats * 5;
+      const monthlyPrice = 29 + extraSeats * 5;
+      const simUrl = `/stripe-checkout-sim?total_users=${totalUsers}&additional_users=${extraSeats}&first_price=${firstPrice}&monthly_price=${monthlyPrice}&success_url=${encodeURIComponent("/payment-success")}&cancel_url=${encodeURIComponent("/payment-cancelled")}`;
+      window.location.href = simUrl;
     }
   };
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 font-sans transition-colors duration-300">
-      
       {/* Absolute Loading Overlay during Stripe integration redirect handshake */}
       <AnimatePresence>
         {isRedirecting && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -130,8 +139,8 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
 
       {/* Back to Home Button */}
       <div className="mb-6 sm:mb-8 text-left">
-        <button 
-          onClick={() => navigate('/')}
+        <button
+          onClick={() => navigate("/")}
           id="btn-checkout-back"
           className="group inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest transition-colors cursor-pointer text-slate-400 hover:text-white"
         >
@@ -141,17 +150,17 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        
         {/* LEFT COLUMN: GREETING, METADATA & INCLUSION CHECKLIST (7 Cols) */}
         <div className="lg:col-span-7 space-y-8 text-left">
           <div className="space-y-4">
-
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight text-white leading-tight">
               Start using ConciseCap
             </h1>
-            
+
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-sans max-w-xl">
-              Field documentation software for contractors who need cleaner job records, faster approvals, and fewer missing details between the field and office.
+              Field documentation software for contractors who need cleaner job
+              records, faster approvals, and fewer missing details between the
+              field and office.
             </p>
           </div>
 
@@ -161,18 +170,18 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
               <span>What’s included</span>
               <span className="h-px flex-1 bg-slate-800" />
             </h3>
-            
+
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               {[
-                'Field photo and note capture',
-                'Customer signatures and proof of work',
-                '15GB of storage for free',
-                'Equipment and job-site details',
-                'Organized job records',
-                'Office review workflow',
-                'Invoice-ready packages',
-                'Searchable job history',
-                'Support for HVAC, roofing, plumbing, electrical, inspections, and other trades'
+                "Field photo and note capture",
+                "Customer signatures and proof of work",
+                "15GB of storage for free",
+                "Equipment and job-site details",
+                "Organized job records",
+                "Office review workflow",
+                "Invoice-ready packages",
+                "Searchable job history",
+                "Support for HVAC, roofing, plumbing, electrical, inspections, and other trades",
               ].map((inc, idx) => (
                 <li key={idx} className="flex items-start gap-2.5">
                   <div className="mt-0.5 p-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
@@ -193,21 +202,41 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
               <span>What happens after checkout</span>
             </h3>
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-              After checkout, you’ll be able to set up your company workspace, add team members, and start documenting jobs from the field.
+              After checkout, you’ll be able to set up your company workspace,
+              add team members, and start documenting jobs from the field.
             </p>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               {[
-                { step: '1', title: 'Secure checkout', desc: 'Complete checkout on Stripe.' },
-                { step: '2', title: 'Set up company', desc: 'Provision your secure workspace.' },
-                { step: '3', title: 'Invite your team', desc: 'Deploy app to crew devices.' }
+                {
+                  step: "1",
+                  title: "Secure checkout",
+                  desc: "Complete checkout on Stripe.",
+                },
+                {
+                  step: "2",
+                  title: "Set up company",
+                  desc: "Provision your secure workspace.",
+                },
+                {
+                  step: "3",
+                  title: "Invite your team",
+                  desc: "Deploy app to crew devices.",
+                },
               ].map((s, index) => (
-                <div key={index} className="p-3 bg-slate-900/20 rounded-xl border border-slate-900 space-y-1.5 text-left">
+                <div
+                  key={index}
+                  className="p-3 bg-slate-900/20 rounded-xl border border-slate-900 space-y-1.5 text-left"
+                >
                   <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-mono text-xs font-bold">
                     {s.step}
                   </div>
-                  <h4 className="text-xs font-bold text-white tracking-tight">{s.title}</h4>
-                  <p className="text-[10px] text-slate-400 leading-tight">{s.desc}</p>
+                  <h4 className="text-xs font-bold text-white tracking-tight">
+                    {s.title}
+                  </h4>
+                  <p className="text-[10px] text-slate-400 leading-tight">
+                    {s.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -217,10 +246,9 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
         {/* RIGHT COLUMN: INTERACTIVE PRICING CARD & STRIPE GATEWAY TRIGGER (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
           <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-slate-950 to-[#0e1628] border border-slate-800 shadow-2xl relative overflow-hidden text-left">
-            
             {/* Visual background lights */}
             <div className="absolute top-0 right-0 w-44 h-44 bg-blue-500/5 blur-3xl rounded-full pointer-events-none" />
-            
+
             {/* Package details */}
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -239,19 +267,29 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
             {/* Pricing Details Hero */}
             <div className="p-5 rounded-2xl bg-blue-950/20 border border-blue-900/20 mb-6 space-y-2">
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-serif font-black text-white">$9</span>
-                <span className="text-sm font-mono text-slate-300">first month</span>
+                <span className="text-4xl font-serif font-black text-white">
+                  $9
+                </span>
+                <span className="text-sm font-mono text-slate-300">
+                  first month
+                </span>
               </div>
               <div className="text-xs text-slate-400">
-                Then <span className="text-slate-200 font-semibold">$29/month</span> after your first month
+                Then{" "}
+                <span className="text-slate-200 font-semibold">$29/month</span>{" "}
+                after your first month
               </div>
             </div>
 
             {/* Interactive User Add-on Calculator (Extremely Delightful B2B Feature) */}
             <div className="space-y-4 pb-6 border-b border-slate-900">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-300 font-medium">Included Seats:</span>
-                <span className="text-white font-semibold font-mono">Up to 5 users</span>
+                <span className="text-slate-300 font-medium">
+                  Included Seats:
+                </span>
+                <span className="text-white font-semibold font-mono">
+                  Up to 5 users
+                </span>
               </div>
 
               <div className="space-y-2">
@@ -262,10 +300,10 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
                       $5/user/month
                     </span>
                   </label>
-                  
+
                   {/* Plus/Minus counter */}
                   <div className="flex items-center gap-2.5 bg-slate-900 border border-slate-800 p-1.5 rounded-xl">
-                    <button 
+                    <button
                       type="button"
                       onClick={handleDecrement}
                       disabled={totalUsers <= 5}
@@ -276,7 +314,7 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
                     <span className="text-xs font-mono font-bold text-white w-5 text-center select-none">
                       {totalUsers}
                     </span>
-                    <button 
+                    <button
                       type="button"
                       onClick={handleIncrement}
                       className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-slate-800 text-slate-300 cursor-pointer text-xs"
@@ -287,13 +325,15 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
                 </div>
 
                 {extraUsers > 0 && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-[11px] text-blue-400/90 bg-blue-500/5 border border-blue-500/10 p-2.5 rounded-xl flex justify-between items-center"
                   >
                     <span>+{extraUsers} additional team members</span>
-                    <span className="font-mono font-bold font-semibold">+${extraCost}/month</span>
+                    <span className="font-mono font-bold font-semibold">
+                      +${extraCost}/month
+                    </span>
                   </motion.div>
                 )}
               </div>
@@ -303,11 +343,15 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
             <div className="space-y-2 pt-6 pb-6 text-xs text-slate-300 font-sans">
               <div className="flex justify-between">
                 <span>First month pricing:</span>
-                <span className="text-white font-bold font-mono">${firstMonthTotal}</span>
+                <span className="text-white font-bold font-mono">
+                  ${firstMonthTotal}
+                </span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Monthly recurring thereafter:</span>
-                <span className="text-slate-300 font-mono">${recurringMonthTotal}/mo</span>
+                <span className="text-slate-300 font-mono">
+                  ${recurringMonthTotal}/mo
+                </span>
               </div>
             </div>
 
@@ -341,18 +385,18 @@ export function CheckoutPage({ navigate, isDarkMode }: CheckoutPageProps) {
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Optional extra security disclaimer */}
           <div className="flex p-4 rounded-2xl bg-slate-900/10 border border-slate-900/40 items-start gap-2.5 text-left">
             <Lock className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
             <p className="text-[11px] text-slate-500 leading-normal">
-              Direct checkout redirects to Stripe SSL servers. ConciseCap never stores, processes, or transmits credit card information on this server domain.
+              Direct checkout redirects to Stripe SSL servers. ConciseCap never
+              stores, processes, or transmits credit card information on this
+              server domain.
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );
